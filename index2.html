@@ -1,0 +1,269 @@
+```html
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Contador para a Reforma</title>
+
+<style>
+
+body{
+    margin:0;
+    padding:20px;
+    background:#121212;
+    color:white;
+    font-family:Segoe UI,sans-serif;
+}
+
+.container{
+    max-width:900px;
+    margin:auto;
+}
+
+.card{
+    background:#1e1e1e;
+    padding:20px;
+    border-radius:15px;
+    margin-top:20px;
+    box-shadow:0 0 15px rgba(255,255,255,.05);
+}
+
+h1{
+    text-align:center;
+    color:#4fc3f7;
+}
+
+input{
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    background:#2c2c2c;
+    color:white;
+    font-size:16px;
+}
+
+button{
+    padding:12px 25px;
+    border:none;
+    border-radius:8px;
+    background:#4fc3f7;
+    color:black;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.resultado{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:15px;
+    margin-top:20px;
+}
+
+.item{
+    background:#252525;
+    padding:15px;
+    border-radius:10px;
+    text-align:center;
+}
+
+.numero{
+    font-size:28px;
+    font-weight:bold;
+    color:#81d4fa;
+}
+
+.progress{
+    width:100%;
+    height:25px;
+    background:#333;
+    border-radius:20px;
+    overflow:hidden;
+    margin-top:10px;
+}
+
+.progress-bar{
+    height:100%;
+    background:#4fc3f7;
+    width:0%;
+    transition:1s;
+}
+
+.frase{
+    margin-top:20px;
+    font-size:1.2em;
+    color:#ffd54f;
+    text-align:center;
+    font-style:italic;
+}
+
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>🏖️ Quanto Falta Para a Reforma?</h1>
+
+<div class="card">
+
+<label>Data de nascimento:</label><br><br>
+
+<input type="date" id="nascimento">
+
+<button onclick="calcular()">
+Calcular
+</button>
+
+</div>
+
+<div id="conteudo" style="display:none;">
+
+<div class="card">
+
+<h2>📊 Estatísticas</h2>
+
+<div class="resultado">
+
+<div class="item">
+<div>Dias Vividos</div>
+<div id="diasVividos" class="numero"></div>
+</div>
+
+<div class="item">
+<div>Dias até Reforma</div>
+<div id="diasReforma" class="numero"></div>
+</div>
+
+<div class="item">
+<div>Natais por Viver</div>
+<div id="natais" class="numero"></div>
+</div>
+
+<div class="item">
+<div>Verões por Viver</div>
+<div id="veroes" class="numero"></div>
+</div>
+
+<div class="item">
+<div>Cafés Estimados</div>
+<div id="cafes" class="numero"></div>
+</div>
+
+<div class="item">
+<div>Salários por Receber</div>
+<div id="salarios" class="numero"></div>
+</div>
+
+</div>
+
+<h3>Percentagem do caminho até à reforma</h3>
+
+<div class="progress">
+<div class="progress-bar" id="barra"></div>
+</div>
+
+<div id="percentagem" style="margin-top:10px;"></div>
+
+<div class="frase" id="frase"></div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+function calcular(){
+
+const nascimento =
+new Date(document.getElementById("nascimento").value);
+
+if(isNaN(nascimento)){
+    alert("Escolha uma data.");
+    return;
+}
+
+const hoje = new Date();
+
+const reforma = new Date(nascimento);
+reforma.setFullYear(reforma.getFullYear()+66);
+reforma.setMonth(reforma.getMonth()+7);
+
+const diasVividos =
+Math.floor((hoje-nascimento)/(1000*60*60*24));
+
+const diasFaltam =
+Math.max(
+0,
+Math.floor((reforma-hoje)/(1000*60*60*24))
+);
+
+const natais =
+Math.max(
+0,
+reforma.getFullYear()-hoje.getFullYear()
+);
+
+const veroes = natais;
+
+const cafes =
+diasFaltam * 2;
+
+const salarios =
+Math.floor(diasFaltam/30.44);
+
+const totalVidaLaboral =
+(reforma-nascimento);
+
+const progresso =
+((hoje-nascimento)/totalVidaLaboral)*100;
+
+document.getElementById("conteudo").style.display="block";
+
+document.getElementById("diasVividos").innerHTML =
+diasVividos.toLocaleString();
+
+document.getElementById("diasReforma").innerHTML =
+diasFaltam.toLocaleString();
+
+document.getElementById("natais").innerHTML =
+natais;
+
+document.getElementById("veroes").innerHTML =
+veroes;
+
+document.getElementById("cafes").innerHTML =
+cafes.toLocaleString();
+
+document.getElementById("salarios").innerHTML =
+salarios.toLocaleString();
+
+document.getElementById("barra").style.width =
+Math.min(100,progresso)+"%";
+
+document.getElementById("percentagem").innerHTML =
+progresso.toFixed(1)+"% concluído";
+
+const frases = [
+"Cada dia é um passo mais perto da liberdade.",
+"O futuro constrói-se hoje.",
+"A persistência transforma sonhos em realidade.",
+"Continue firme, a meta aproxima-se.",
+"O melhor investimento é continuar a avançar.",
+"Hoje está mais perto da reforma do que ontem.",
+"Grandes jornadas fazem-se passo a passo."
+];
+
+document.getElementById("frase").innerHTML =
+frases[Math.floor(Math.random()*frases.length)];
+
+}
+
+</script>
+
+</body>
+</html>
+```
