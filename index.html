@@ -49,7 +49,23 @@
         margin: 20px 0;
     }
 
-    input {
+    input[type="date"] {
+        padding: 12px;
+        border: 2px solid #2d2d2d;
+        border-radius: 8px;
+        background: #2d2d2d;
+        color: white;
+        font-size: 1em;
+        transition: border-color 0.3s;
+        cursor: pointer;
+    }
+
+    input[type="date"]:focus {
+        outline: none;
+        border-color: #4fc3f7;
+    }
+
+    input[type="number"] {
         width: 80px;
         padding: 12px;
         border: 2px solid #2d2d2d;
@@ -61,13 +77,20 @@
         transition: border-color 0.3s;
     }
 
-    input:focus {
+    input[type="number"]:focus {
         outline: none;
         border-color: #4fc3f7;
     }
 
     input::placeholder {
         color: #888;
+    }
+
+    .info-text {
+        font-size: 0.9em;
+        color: #aaa;
+        margin-top: 10px;
+        margin-bottom: 15px;
     }
 
     button {
@@ -126,9 +149,8 @@
             padding: 20px;
         }
 
-        input {
-            width: 70px;
-            padding: 10px;
+        input[type="date"] {
+            width: 100%;
         }
 
         button {
@@ -142,12 +164,14 @@
 <div class="container">
     <h1>Quanto Falta para a Reforma?</h1>
 
-    <p>Indique a sua idade atual:</p>
+    <p>Insira a sua data de nascimento:</p>
 
     <div class="input-group">
-        <input type="number" id="anos" placeholder="Anos" min="0" max="120" aria-label="Idade em anos">
-        <input type="number" id="meses" placeholder="Meses" min="0" max="11" aria-label="Meses adicionais">
-        <input type="number" id="dias" placeholder="Dias" min="0" max="31" aria-label="Dias adicionais">
+        <input type="date" id="dataNascimento" aria-label="Data de nascimento">
+    </div>
+
+    <div class="info-text">
+        Data de reforma: 66 anos e 7 meses
     </div>
 
     <button onclick="calcular()">Calcular</button>
@@ -156,7 +180,7 @@
 </div>
 
 <script>
-// Array de frases (movido para fora da função)
+// Array de frases
 const FRASES = [
     "Conta os dias para a reforma, seu escravo moderno. A vida já te passou ao lado há 20 anos.",
     "Sonhas com a reforma? Relaxa, ainda vais chupar mais uns quantos anos de caralho a esta empresa.",
@@ -181,72 +205,57 @@ const FRASES = [
 ];
 
 function calcular() {
-    // Obter valores dos inputs
-    const idadeAnos = parseInt(document.getElementById("anos").value) || 0;
-    const idadeMeses = parseInt(document.getElementById("meses").value) || 0;
-    const idadeDias = parseInt(document.getElementById("dias").value) || 0;
+    const dataNascimentoInput = document.getElementById("dataNascimento").value;
 
-    // Validação de entrada
-    if (idadeAnos < 0 || idadeAnos > 120 || idadeMeses > 11 || idadeDias > 31) {
+    // Validação: verificar se foi inserida uma data
+    if (!dataNascimentoInput) {
         document.getElementById("resultado").innerHTML = 
-            '<div class="erro">⚠️ Por favor, insira uma idade válida!</div>';
+            '<div class="erro">⚠️ Por favor, insira a sua data de nascimento!</div>';
         return;
     }
 
-    // Data de nascimento (aproximada)
+    // Converter a data de nascimento
+    const dataNascimento = new Date(dataNascimentoInput);
     const hoje = new Date();
-    const dataNascimento = new Date(
-        hoje.getFullYear() - idadeAnos,
-        hoje.getMonth() - idadeMeses,
-        hoje.getDate() - idadeDias
-    );
 
-    // Data de reforma (66 anos, 7 meses)
+    // Validação: verificar se a data é válida e no passado
+    if (dataNascimento > hoje) {
+        document.getElementById("resultado").innerHTML = 
+            '<div class="erro">⚠️ A data de nascimento deve ser no passado!</div>';
+        return;
+    }
+
+    // Calcular a data de reforma (66 anos e 7 meses)
     const dataReforma = new Date(
         dataNascimento.getFullYear() + 66,
         dataNascimento.getMonth() + 7,
         dataNascimento.getDate()
     );
 
-    // Calcular diferença
-    let diferenca = dataReforma - hoje;
-
-    if (diferenca <= 0) {
+    // Se já passou da data de reforma
+    if (dataReforma <= hoje) {
         document.getElementById("resultado").innerHTML = 
             '<div class="sucesso">🎉 Já atingiu a idade de reforma!</div>';
         return;
     }
 
-    // Converter diferença em dias, meses e anos
-    let anos = 0;
-    let meses = 0;
-    let dias = 0;
+    // Calcular diferença em anos, meses e dias
+    let anos = dataReforma.getFullYear() - hoje.getFullYear();
+    let meses = dataReforma.getMonth() - hoje.getMonth();
+    let dias = dataReforma.getDate() - hoje.getDate();
 
-    // Calcular anos
-    let dataTemp = new Date(hoje);
-    while (dataTemp < dataReforma) {
-        dataTemp.setFullYear(dataTemp.getFullYear() + 1);
-        if (dataTemp <= dataReforma) {
-            anos++;
-        } else {
-            dataTemp.setFullYear(dataTemp.getFullYear() - 1);
-            break;
-        }
+    // Ajustar se os dias forem negativos
+    if (dias < 0) {
+        meses--;
+        const mesAnterior = new Date(dataReforma.getFullYear(), dataReforma.getMonth(), 0);
+        dias += mesAnterior.getDate();
     }
 
-    // Calcular meses
-    while (dataTemp < dataReforma) {
-        dataTemp.setMonth(dataTemp.getMonth() + 1);
-        if (dataTemp <= dataReforma) {
-            meses++;
-        } else {
-            dataTemp.setMonth(dataTemp.getMonth() - 1);
-            break;
-        }
+    // Ajustar se os meses forem negativos
+    if (meses < 0) {
+        anos--;
+        meses += 12;
     }
-
-    // Calcular dias
-    dias = Math.floor((dataReforma - dataTemp) / (1000 * 60 * 60 * 24));
 
     // Selecionar frase aleatória
     const frase = FRASES[Math.floor(Math.random() * FRASES.length)];
@@ -263,13 +272,7 @@ function calcular() {
 
 // Permitir calcular ao pressionar Enter
 document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById("anos").addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') calcular();
-    });
-    document.getElementById("meses").addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') calcular();
-    });
-    document.getElementById("dias").addEventListener('keypress', function(e) {
+    document.getElementById("dataNascimento").addEventListener('keypress', function(e) {
         if (e.key === 'Enter') calcular();
     });
 });
