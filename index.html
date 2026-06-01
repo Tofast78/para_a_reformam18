@@ -6,67 +6,134 @@
 <title>Contagem para a Reforma</title>
 
 <style>
-    body{
-        background:#121212;
-        color:#ffffff;
-        font-family:Arial, sans-serif;
-        display:flex;
-        justify-content:center;
-        align-items:center;
-        min-height:100vh;
-        margin:0;
+    * {
+        box-sizing: border-box;
     }
 
-    .container{
-        background:#1e1e1e;
-        padding:30px;
-        border-radius:15px;
-        box-shadow:0 0 15px rgba(255,255,255,0.1);
-        max-width:500px;
-        width:90%;
-        text-align:center;
+    body {
+        background: #121212;
+        color: #ffffff;
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 10px;
     }
 
-    h1{
-        color:#4fc3f7;
+    .container {
+        background: #1e1e1e;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+        max-width: 500px;
+        width: 100%;
+        text-align: center;
     }
 
-    input{
-        width:80px;
-        padding:10px;
-        margin:5px;
-        border:none;
-        border-radius:8px;
-        text-align:center;
-        background:#2d2d2d;
-        color:white;
+    h1 {
+        color: #4fc3f7;
+        margin-top: 0;
     }
 
-    button{
-        margin-top:15px;
-        padding:12px 20px;
-        border:none;
-        border-radius:8px;
-        background:#4fc3f7;
-        color:black;
-        font-weight:bold;
-        cursor:pointer;
+    p {
+        margin: 15px 0;
     }
 
-    button:hover{
-        background:#81d4fa;
+    .input-group {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin: 20px 0;
     }
 
-    #resultado{
-        margin-top:25px;
-        font-size:1.2em;
-        line-height:1.6;
+    input {
+        width: 80px;
+        padding: 12px;
+        border: 2px solid #2d2d2d;
+        border-radius: 8px;
+        text-align: center;
+        background: #2d2d2d;
+        color: white;
+        font-size: 1em;
+        transition: border-color 0.3s;
     }
 
-    .frase{
-        margin-top:15px;
-        color:#ffd54f;
-        font-style:italic;
+    input:focus {
+        outline: none;
+        border-color: #4fc3f7;
+    }
+
+    input::placeholder {
+        color: #888;
+    }
+
+    button {
+        margin-top: 15px;
+        padding: 14px 30px;
+        border: none;
+        border-radius: 8px;
+        background: #4fc3f7;
+        color: black;
+        font-weight: bold;
+        font-size: 1em;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    button:hover {
+        background: #81d4fa;
+    }
+
+    button:active {
+        transform: scale(0.98);
+    }
+
+    #resultado {
+        margin-top: 25px;
+        font-size: 1.2em;
+        line-height: 1.8;
+        min-height: 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .frase {
+        margin-top: 15px;
+        color: #ffd54f;
+        font-style: italic;
+        padding: 10px;
+        border-left: 3px solid #ffd54f;
+        text-align: left;
+    }
+
+    .erro {
+        color: #ff6b6b;
+        margin-top: 15px;
+    }
+
+    .sucesso {
+        color: #51cf66;
+        font-weight: bold;
+        font-size: 1.3em;
+    }
+
+    @media (max-width: 480px) {
+        .container {
+            padding: 20px;
+        }
+
+        input {
+            width: 70px;
+            padding: 10px;
+        }
+
+        button {
+            padding: 12px 24px;
+        }
     }
 </style>
 </head>
@@ -77,11 +144,11 @@
 
     <p>Indique a sua idade atual:</p>
 
-    <input type="number" id="anos" placeholder="Anos" min="0">
-    <input type="number" id="meses" placeholder="Meses" min="0" max="11">
-    <input type="number" id="dias" placeholder="Dias" min="0" max="31">
-
-    <br>
+    <div class="input-group">
+        <input type="number" id="anos" placeholder="Anos" min="0" max="120" aria-label="Idade em anos">
+        <input type="number" id="meses" placeholder="Meses" min="0" max="11" aria-label="Meses adicionais">
+        <input type="number" id="dias" placeholder="Dias" min="0" max="31" aria-label="Dias adicionais">
+    </div>
 
     <button onclick="calcular()">Calcular</button>
 
@@ -89,70 +156,123 @@
 </div>
 
 <script>
-function calcular() {
+// Array de frases (movido para fora da função)
+const FRASES = [
+    "Conta os dias para a reforma, seu escravo moderno. A vida já te passou ao lado há 20 anos.",
+    "Sonhas com a reforma? Relaxa, ainda vais chupar mais uns quantos anos de caralho a esta empresa.",
+    "Faltam X dias para a reforma. Até lá continua a dar o cu por um salário de merda.",
+    "Estás a guardar energias para a reforma? Engraçado, o teu corpo já desistiu há muito tempo.",
+    "Reforma é o novo nome para 'finalmente vou poder viver depois de me foderem durante 40 anos'.",
+    "Conta os dias, palhaço. Enquanto isso, o patrão conta o dinheiro que tu geras.",
+    "Quando chegares à reforma vais ter dinheiro para o cemitério e tempo para te arrependeres.",
+    "Trabalha mais um bocadinho, guerreiro. A reforma é para quem sobrevive.",
+    "Sonhar com a reforma é o ópio do trabalhador. Continua a inalar.",
+    "Faltam X dias para parares de ser escravo. Spoiler: vais continuar pobre e fodido.",
+    "A reforma não é o fim do trabalho, é o início de te perguntares porque caralho perdeste a vida toda.",
+    "Continua a marcar o calendário, otário. O tempo passa, tu envelheces e a empresa contrata outro burro.",
+    "Estás ansioso pela reforma? Calma, ainda tens tempo para mais depressão, burnout e humilhações.",
+    "Reforma = finalmente poder cagar sem pedir autorização ao chefe. Sonha alto.",
+    "Trabalha hoje para descansar amanhã. Amanhã já estás velho e com a próstata no cu.",
+    "Conta os dias para a liberdade… que vai durar o tempo que o teu corpo aguentar.",
+    "A melhor parte da reforma é perceberes que desperdiçaste a tua vida por uma pensão de merda.",
+    "Continua a sorrir para o chefe. Ele vai-se reformar rico, tu vais-te reformar cansado.",
+    "Faltam X dias para a reforma. Depois podes finalmente fingir que viveste.",
+    "Parabéns, estás quase a deixar de ser uma puta do sistema. Bem-vindo à velhice pobre."
+];
 
+function calcular() {
+    // Obter valores dos inputs
     const idadeAnos = parseInt(document.getElementById("anos").value) || 0;
     const idadeMeses = parseInt(document.getElementById("meses").value) || 0;
     const idadeDias = parseInt(document.getElementById("dias").value) || 0;
 
-    const reformaAnos = 66;
-    const reformaMeses = 7;
-    const reformaDias = 0;
-
-    let anos = reformaAnos - idadeAnos;
-    let meses = reformaMeses - idadeMeses;
-    let dias = reformaDias - idadeDias;
-
-    if (dias < 0) {
-        dias += 30;
-        meses--;
+    // Validação de entrada
+    if (idadeAnos < 0 || idadeAnos > 120 || idadeMeses > 11 || idadeDias > 31) {
+        document.getElementById("resultado").innerHTML = 
+            '<div class="erro">⚠️ Por favor, insira uma idade válida!</div>';
+        return;
     }
 
-    if (meses < 0) {
-        meses += 12;
-        anos--;
+    // Data de nascimento (aproximada)
+    const hoje = new Date();
+    const dataNascimento = new Date(
+        hoje.getFullYear() - idadeAnos,
+        hoje.getMonth() - idadeMeses,
+        hoje.getDate() - idadeDias
+    );
+
+    // Data de reforma (66 anos, 7 meses)
+    const dataReforma = new Date(
+        dataNascimento.getFullYear() + 66,
+        dataNascimento.getMonth() + 7,
+        dataNascimento.getDate()
+    );
+
+    // Calcular diferença
+    let diferenca = dataReforma - hoje;
+
+    if (diferenca <= 0) {
+        document.getElementById("resultado").innerHTML = 
+            '<div class="sucesso">🎉 Já atingiu a idade de reforma!</div>';
+        return;
     }
 
-    const frases = [
-       Conta os dias para a reforma, seu escravo moderno. A vida já te passou ao lado há 20 anos.",
-"Sonhas com a reforma? Relaxa, ainda vais chupar mais uns quantos anos de caralho a esta empresa.",
-"Faltam X dias para a reforma. Até lá continua a dar o cu por um salário de merda.",
-"Estás a guardar energias para a reforma? Engraçado, o teu corpo já desistiu há muito tempo.",
-"Reforma é o novo nome para 'finalmente vou poder viver depois de me foderem durante 40 anos'.",
-"Conta os dias, palhaço. Enquanto isso, o patrão conta o dinheiro que tu geras.",
-"Quando chegares à reforma vais ter dinheiro para o cemitério e tempo para te arrependeres.",
-"Trabalha mais um bocadinho, guerreiro. A reforma é para quem sobrevive.",
-"Sonhar com a reforma é o ópio do trabalhador. Continua a inalar.",
-"Faltam X dias para parares de ser escravo. Spoiler: vais continuar pobre e fodido.",
-"A reforma não é o fim do trabalho, é o início de te perguntares porque caralho perdeste a vida toda.",
-"Continua a marcar o calendário, otário. O tempo passa, tu envelheces e a empresa contrata outro burro.",
-"Estás ansioso pela reforma? Calma, ainda tens tempo para mais depressão, burnout e humilhações.",
-"Reforma = finalmente poder cagar sem pedir autorização ao chefe. Sonha alto.",
-"Trabalha hoje para descansar amanhã. Amanhã já estás velho e com a próstata no cu.",
-"Conta os dias para a liberdade… que vai durar o tempo que o teu corpo aguentar.",
-"A melhor parte da reforma é perceberes que desperdiçaste a tua vida por uma pensão de merda.",
-"Continua a sorrir para o chefe. Ele vai-se reformar rico, tu vais-te reformar cansado.",
-"Faltam X dias para a reforma. Depois podes finalmente fingir que viveste.",
-"Parabéns, estás quase a deixar de ser uma puta do sistema. Bem-vindo à velhice pobre.",
-"
-    ];
+    // Converter diferença em dias, meses e anos
+    let anos = 0;
+    let meses = 0;
+    let dias = 0;
 
-    const frase = frases[Math.floor(Math.random() * frases.length)];
-
-    let mensagem;
-
-    if (anos < 0 || (anos === 0 && meses === 0 && dias === 0)) {
-        mensagem = "🎉 Já atingiu a idade de reforma!";
-    } else {
-        mensagem = `
-            <strong>Faltam:</strong><br>
-            ${anos} anos, ${meses} meses e ${dias} dias
-            <div class="frase">"${frase}"</div>
-        `;
+    // Calcular anos
+    let dataTemp = new Date(hoje);
+    while (dataTemp < dataReforma) {
+        dataTemp.setFullYear(dataTemp.getFullYear() + 1);
+        if (dataTemp <= dataReforma) {
+            anos++;
+        } else {
+            dataTemp.setFullYear(dataTemp.getFullYear() - 1);
+            break;
+        }
     }
+
+    // Calcular meses
+    while (dataTemp < dataReforma) {
+        dataTemp.setMonth(dataTemp.getMonth() + 1);
+        if (dataTemp <= dataReforma) {
+            meses++;
+        } else {
+            dataTemp.setMonth(dataTemp.getMonth() - 1);
+            break;
+        }
+    }
+
+    // Calcular dias
+    dias = Math.floor((dataReforma - dataTemp) / (1000 * 60 * 60 * 24));
+
+    // Selecionar frase aleatória
+    const frase = FRASES[Math.floor(Math.random() * FRASES.length)];
+
+    // Montar mensagem
+    const mensagem = `
+        <strong>Faltam:</strong><br>
+        ${anos} anos, ${meses} meses e ${dias} dias
+        <div class="frase">"${frase}"</div>
+    `;
 
     document.getElementById("resultado").innerHTML = mensagem;
 }
+
+// Permitir calcular ao pressionar Enter
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById("anos").addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') calcular();
+    });
+    document.getElementById("meses").addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') calcular();
+    });
+    document.getElementById("dias").addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') calcular();
+    });
+});
 </script>
 
 </body>
